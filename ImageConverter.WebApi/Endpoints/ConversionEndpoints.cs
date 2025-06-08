@@ -42,6 +42,15 @@ internal static class ConversionEndpoints
         .WithName("DownloadImage")
         .WithOpenApi();
 
+        app.MapGet("/hello", async (CancellationToken cancellationToken) =>
+        {
+
+            return Results.Ok("Hi!");
+
+        })
+        .WithName("SayHello")
+        .WithOpenApi();
+
         return app;
     }
 }
