@@ -20,8 +20,15 @@ internal static class ConversionEndpoints
 
         app.MapGet("/task/{taskId}", async (Guid taskId, IGetTaskStatusHandler handler, CancellationToken cancellationToken) =>
         {
-            var response = await handler.HandleAsync(new GetTaskStatusRequest(taskId), cancellationToken);
-            return Results.Ok(response);
+            try
+            {
+                var response = await handler.HandleAsync(new GetTaskStatusRequest(taskId), cancellationToken);
+                return Results.Ok(response);
+            }
+            catch (InvalidOperationException)
+            {
+                return Results.NotFound();
+            }
         })
         .WithName("GetTaskStatus")
         .WithOpenApi();
