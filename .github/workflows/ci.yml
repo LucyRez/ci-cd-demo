@@ -88,8 +88,8 @@ jobs:
           }'
 
   build-docker:
-    needs: build
-    if: github.ref == 'refs/heads/master' && steps.test.outcome == 'success'
+    needs: test
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     container:
       image: quay.io/buildah/stable:latest
