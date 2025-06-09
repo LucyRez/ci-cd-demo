@@ -96,6 +96,8 @@ jobs:
       options: --privileged
     
     steps:
+    - uses: actions/checkout@v3  # <--- ОБЯЗАТЕЛЬНО
+
     - name: Login to Docker Hub
       id: docker-login
       run: |
