@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,10 +23,82 @@ jobs:
         dotnet-version: 8.0.x
     
     - name: Restore dependencies
+      id: restore
       run: dotnet restore
+      continue-on-error: true
+
+    - name: Notify on restore failure
+      if: steps.restore.outcome == 'failure'
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ env.TELEGRAM_CHAT_ID }}
+        token: ${{ env.TELEGRAM_BOT_TOKEN }}
+        format: html
+        message: |
+          🚫 <b>Build Failed</b>
+          
+          <b>Project:</b> ImageConverter
+          <b>Branch:</b> ${{ github.ref_name }}
+          <b>Commit:</b> ${{ github.sha }}
+          
+          <b>Error:</b> Failed to restore dependencies
     
     - name: Build
+      id: build
+      if: steps.restore.outcome == 'success'
       run: dotnet build --no-restore
+      continue-on-error: true
+
+    - name: Notify on build failure
+      if: steps.build.outcome == 'failure'
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ env.TELEGRAM_CHAT_ID }}
+        token: ${{ env.TELEGRAM_BOT_TOKEN }}
+        format: html
+        message: |
+          🚫 <b>Build Failed</b>
+          
+          <b>Project:</b> ImageConverter
+          <b>Branch:</b> ${{ github.ref_name }}
+          <b>Commit:</b> ${{ github.sha }}
+          
+          <b>Error:</b> Build failed
     
     - name: Test
-      run: dotnet test --no-build --verbosity normal 
+      id: test
+      if: steps.build.outcome == 'success'
+      run: dotnet test --no-build --verbosity normal
+      continue-on-error: true
+
+    - name: Notify on test failure
+      if: steps.test.outcome == 'failure'
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ env.TELEGRAM_CHAT_ID }}
+        token: ${{ env.TELEGRAM_BOT_TOKEN }}
+        format: html
+        message: |
+          🚫 <b>Tests Failed</b>
+          
+          <b>Project:</b> ImageConverter
+          <b>Branch:</b> ${{ github.ref_name }}
+          <b>Commit:</b> ${{ github.sha }}
+          
+          <b>Error:</b> Tests failed
+
+    - name: Notify on success
+      if: steps.test.outcome == 'success'
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ env.TELEGRAM_CHAT_ID }}
+        token: ${{ env.TELEGRAM_BOT_TOKEN }}
+        format: html
+        message: |
+          ✅ <b>Build and Tests Passed</b>
+          
+          <b>Project:</b> ImageConverter
+          <b>Branch:</b> ${{ github.ref_name }}
+          <b>Commit:</b> ${{ github.sha }}
+          
+          <b>Status:</b> All tests passed successfully
