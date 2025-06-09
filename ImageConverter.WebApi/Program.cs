@@ -10,6 +10,7 @@ using ImageConverter.WebApi.UseCases.UploadImage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
+// Create builder
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
