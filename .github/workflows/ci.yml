@@ -96,16 +96,44 @@ jobs:
     
     steps:
     - name: Login to Docker Hub
+      id: docker-login
       run: |
         echo "${{ secrets.DOCKER_PASSWORD }}" | buildah login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      continue-on-error: true
+
+    - name: Notify on Docker Hub login failure
+      if: steps.docker-login.outcome == 'failure'
+      run: |
+        curl -s -X POST "https://api.telegram.org/bot${{ env.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "chat_id": "${{ env.TELEGRAM_CHAT_ID }}",
+            "parse_mode": "HTML",
+            "text": "🚫 <b>Docker Hub Login Failed</b>\n\n<b>Project:</b> ImageConverter\n<b>Branch:</b> ${{ github.ref_name }}\n<b>Commit:</b> <a href=\"${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}\">${{ github.sha }}</a>\n\n<b>Author:</b> ${{ github.actor }}\n<b>Commit Message:</b> ${{ github.event.head_commit.message }}\n\n<b>Error:</b> Failed to login to Docker Hub. Please check credentials."
+          }'
 
     - name: Build and push Docker image
+      id: docker-build
+      if: steps.docker-login.outcome == 'success'
       run: |
         buildah build -t ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} -t ${{ env.DOCKER_IMAGE }}:latest .
         buildah push ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
         buildah push ${{ env.DOCKER_IMAGE }}:latest
+      continue-on-error: true
+
+    - name: Notify on Docker build failure
+      if: steps.docker-build.outcome == 'failure'
+      run: |
+        curl -s -X POST "https://api.telegram.org/bot${{ env.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "chat_id": "${{ env.TELEGRAM_CHAT_ID }}",
+            "parse_mode": "HTML",
+            "text": "🚫 <b>Docker Build Failed</b>\n\n<b>Project:</b> ImageConverter\n<b>Branch:</b> ${{ github.ref_name }}\n<b>Commit:</b> <a href=\"${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}\">${{ github.sha }}</a>\n\n<b>Author:</b> ${{ github.actor }}\n<b>Commit Message:</b> ${{ github.event.head_commit.message }}\n\n<b>Error:</b> Failed to build or push Docker image"
+          }'
 
     - name: Notify deployment success
+      if: steps.docker-build.outcome == 'success'
       run: |
         curl -s -X POST "https://api.telegram.org/bot${{ env.TELEGRAM_BOT_TOKEN }}/sendMessage" \
           -H "Content-Type: application/json" \
