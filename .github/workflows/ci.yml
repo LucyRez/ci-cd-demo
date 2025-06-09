@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on:
   push:
@@ -9,6 +9,8 @@ on:
 env:
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/imageconverter
+  DOCKER_TAG: ${{ github.sha }}
 
 jobs:
   build:
@@ -83,4 +85,32 @@ jobs:
             "chat_id": "${{ env.TELEGRAM_CHAT_ID }}",
             "parse_mode": "HTML",
             "text": "✅ <b>Build and Tests Passed</b>\n\n<b>Project:</b> ImageConverter\n<b>Branch:</b> ${{ github.ref_name }}\n<b>Commit:</b> <a href=\"${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}\">${{ github.sha }}</a>\n\n<b>Author:</b> ${{ github.actor }}\n<b>Commit Message:</b> ${{ github.event.head_commit.message }}\n\n<b>Status:</b> All tests passed successfully"
+          }'
+
+  build-docker:
+    needs: build
+    if: github.ref == 'refs/heads/master' && steps.test.outcome == 'success'
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/buildah/stable:latest
+    
+    steps:
+    - name: Login to Docker Hub
+      run: |
+        echo "${{ secrets.DOCKER_PASSWORD }}" | buildah login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: Build and push Docker image
+      run: |
+        buildah build -t ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} -t ${{ env.DOCKER_IMAGE }}:latest .
+        buildah push ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
+        buildah push ${{ env.DOCKER_IMAGE }}:latest
+
+    - name: Notify deployment success
+      run: |
+        curl -s -X POST "https://api.telegram.org/bot${{ env.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "chat_id": "${{ env.TELEGRAM_CHAT_ID }}",
+            "parse_mode": "HTML",
+            "text": "🚀 <b>Docker Image Published</b>\n\n<b>Project:</b> ImageConverter\n<b>Image:</b> ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}\n<b>Latest:</b> ${{ env.DOCKER_IMAGE }}:latest\n\n<b>Status:</b> Image successfully published to Docker Hub"
           }'
