@@ -16,6 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
@@ -41,6 +43,9 @@ jobs:
           <b>Branch:</b> ${{ github.ref_name }}
           <b>Commit:</b> ${{ github.sha }}
           
+          <b>Author:</b> ${{ github.actor }}
+          <b>Commit Message:</b> ${{ github.event.head_commit.message }}
+          
           <b>Error:</b> Failed to restore dependencies
     
     - name: Build
@@ -62,6 +67,9 @@ jobs:
           <b>Project:</b> ImageConverter
           <b>Branch:</b> ${{ github.ref_name }}
           <b>Commit:</b> ${{ github.sha }}
+          
+          <b>Author:</b> ${{ github.actor }}
+          <b>Commit Message:</b> ${{ github.event.head_commit.message }}
           
           <b>Error:</b> Build failed
     
@@ -85,6 +93,9 @@ jobs:
           <b>Branch:</b> ${{ github.ref_name }}
           <b>Commit:</b> ${{ github.sha }}
           
+          <b>Author:</b> ${{ github.actor }}
+          <b>Commit Message:</b> ${{ github.event.head_commit.message }}
+          
           <b>Error:</b> Tests failed
 
     - name: Notify on success
@@ -100,5 +111,8 @@ jobs:
           <b>Project:</b> ImageConverter
           <b>Branch:</b> ${{ github.ref_name }}
           <b>Commit:</b> ${{ github.sha }}
+          
+          <b>Author:</b> ${{ github.actor }}
+          <b>Commit Message:</b> ${{ github.event.head_commit.message }}
           
           <b>Status:</b> All tests passed successfully
