@@ -31,22 +31,14 @@ jobs:
 
     - name: Notify on restore failure
       if: steps.restore.outcome == 'failure'
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{ env.TELEGRAM_CHAT_ID }}
-        token: ${{ env.TELEGRAM_BOT_TOKEN }}
-        format: html
-        message: |
-          🚫 <b>Build Failed</b>
-          
-          <b>Project:</b> ImageConverter
-          <b>Branch:</b> ${{ github.ref_name }}
-          <b>Commit:</b> <a href="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}">${{ github.sha }}</a>
-          
-          <b>Author:</b> ${{ github.actor }}
-          <b>Commit Message:</b> ${{ github.event.head_commit.message }}
-          
-          <b>Error:</b> Failed to restore dependencies
+      run: |
+        curl -s -X POST "https://api.telegram.org/bot${{ env.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "chat_id": "${{ env.TELEGRAM_CHAT_ID }}",
+            "parse_mode": "HTML",
+            "text": "🚫 <b>Build Failed</b>\n\n<b>Project:</b> ImageConverter\n<b>Branch:</b> ${{ github.ref_name }}\n<b>Commit:</b> <a href=\"${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}\">${{ github.sha }}</a>\n\n<b>Author:</b> ${{ github.actor }}\n<b>Commit Message:</b> ${{ github.event.head_commit.message }}\n\n<b>Error:</b> Failed to restore dependencies"
+          }'
     
     - name: Build
       id: build
@@ -56,22 +48,14 @@ jobs:
 
     - name: Notify on build failure
       if: steps.build.outcome == 'failure'
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{ env.TELEGRAM_CHAT_ID }}
-        token: ${{ env.TELEGRAM_BOT_TOKEN }}
-        format: html
-        message: |
-          🚫 <b>Build Failed</b>
-          
-          <b>Project:</b> ImageConverter
-          <b>Branch:</b> ${{ github.ref_name }}
-          <b>Commit:</b> <a href="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}">${{ github.sha }}</a>
-          
-          <b>Author:</b> ${{ github.actor }}
-          <b>Commit Message:</b> ${{ github.event.head_commit.message }}
-          
-          <b>Error:</b> Build failed
+      run: |
+        curl -s -X POST "https://api.telegram.org/bot${{ env.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "chat_id": "${{ env.TELEGRAM_CHAT_ID }}",
+            "parse_mode": "HTML",
+            "text": "🚫 <b>Build Failed</b>\n\n<b>Project:</b> ImageConverter\n<b>Branch:</b> ${{ github.ref_name }}\n<b>Commit:</b> <a href=\"${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}\">${{ github.sha }}</a>\n\n<b>Author:</b> ${{ github.actor }}\n<b>Commit Message:</b> ${{ github.event.head_commit.message }}\n\n<b>Error:</b> Build failed"
+          }'
     
     - name: Test
       id: test
@@ -81,38 +65,22 @@ jobs:
 
     - name: Notify on test failure
       if: steps.test.outcome == 'failure'
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{ env.TELEGRAM_CHAT_ID }}
-        token: ${{ env.TELEGRAM_BOT_TOKEN }}
-        format: html
-        message: |
-          🚫 <b>Tests Failed</b>
-          
-          <b>Project:</b> ImageConverter
-          <b>Branch:</b> ${{ github.ref_name }}
-          <b>Commit:</b> <a href="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}">${{ github.sha }}</a>
-          
-          <b>Author:</b> ${{ github.actor }}
-          <b>Commit Message:</b> ${{ github.event.head_commit.message }}
-          
-          <b>Error:</b> Tests failed
+      run: |
+        curl -s -X POST "https://api.telegram.org/bot${{ env.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "chat_id": "${{ env.TELEGRAM_CHAT_ID }}",
+            "parse_mode": "HTML",
+            "text": "🚫 <b>Tests Failed</b>\n\n<b>Project:</b> ImageConverter\n<b>Branch:</b> ${{ github.ref_name }}\n<b>Commit:</b> <a href=\"${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}\">${{ github.sha }}</a>\n\n<b>Author:</b> ${{ github.actor }}\n<b>Commit Message:</b> ${{ github.event.head_commit.message }}\n\n<b>Error:</b> Tests failed"
+          }'
 
     - name: Notify on success
       if: steps.test.outcome == 'success'
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{ env.TELEGRAM_CHAT_ID }}
-        token: ${{ env.TELEGRAM_BOT_TOKEN }}
-        format: html
-        message: |
-          ✅ <b>Build and Tests Passed</b>
-          
-          <b>Project:</b> ImageConverter
-          <b>Branch:</b> ${{ github.ref_name }}
-          <b>Commit:</b> <a href="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}">${{ github.sha }}</a>
-          
-          <b>Author:</b> ${{ github.actor }}
-          <b>Commit Message:</b> ${{ github.event.head_commit.message }}
-          
-          <b>Status:</b> All tests passed successfully
+      run: |
+        curl -s -X POST "https://api.telegram.org/bot${{ env.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "chat_id": "${{ env.TELEGRAM_CHAT_ID }}",
+            "parse_mode": "HTML",
+            "text": "✅ <b>Build and Tests Passed</b>\n\n<b>Project:</b> ImageConverter\n<b>Branch:</b> ${{ github.ref_name }}\n<b>Commit:</b> <a href=\"${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}\">${{ github.sha }}</a>\n\n<b>Author:</b> ${{ github.actor }}\n<b>Commit Message:</b> ${{ github.event.head_commit.message }}\n\n<b>Status:</b> All tests passed successfully"
+          }'
