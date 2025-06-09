@@ -93,6 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: quay.io/buildah/stable:latest
+      options: --privileged
     
     steps:
     - name: Login to Docker Hub
