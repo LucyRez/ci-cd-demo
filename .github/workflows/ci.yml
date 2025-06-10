@@ -114,6 +114,7 @@ jobs:
             "parse_mode": "HTML",
             "text": "🚫 <b>Docker Hub Login Failed</b>\n\n<b>Project:</b> ImageConverter\n<b>Branch:</b> ${{ github.ref_name }}\n<b>Commit:</b> <a href=\"${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}\">${{ github.sha }}</a>\n\n<b>Author:</b> ${{ github.actor }}\n<b>Commit Message:</b> ${{ github.event.head_commit.message }}\n\n<b>Error:</b> Failed to login to Docker Hub. Please check credentials."
           }'
+          exit 1
 
     - name: Build and push Docker image
       id: docker-build
@@ -134,6 +135,7 @@ jobs:
             "parse_mode": "HTML",
             "text": "🚫 <b>Docker Build Failed</b>\n\n<b>Project:</b> ImageConverter\n<b>Branch:</b> ${{ github.ref_name }}\n<b>Commit:</b> <a href=\"${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}\">${{ github.sha }}</a>\n\n<b>Author:</b> ${{ github.actor }}\n<b>Commit Message:</b> ${{ github.event.head_commit.message }}\n\n<b>Error:</b> Failed to build or push Docker image"
           }'
+          exit 1
 
     - name: Notify deployment success
       if: steps.docker-build.outcome == 'success'
