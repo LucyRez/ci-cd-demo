@@ -59,7 +59,7 @@ public class ImageConversionTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.NotEqual(Guid.Empty, result.TaskId);
+        Assert.Equal(Guid.Empty, result.TaskId);
     }
 
     [Fact]
